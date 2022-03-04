@@ -1,0 +1,98 @@
+#
+# -- Lilith emulator Makefile --
+#
+#  Author : Jos Dreesen 2008-2009
+#
+# -- main.c      : main program
+# -- cpu.c       : cpu and memory model for a Lilith computer
+# -- io_proc.c   : model for Lilith IO functions ( keyboard, mouse)
+# -- io_MD120.c  : model for Honeywell-Bull D120 disk drive.
+# -- io_ST419.c  : model for Seagate ST419 disk drive.
+# -- io_floppy.c : model for Apple-II floppy, using UCSD Pascal format.
+# -- fltk_cde.c  : main fltk interface for the emulator
+#
+# -- lifs.c      : file system tool. 
+#
+#
+
+# core set of source files for emulith
+corefiles   = Src/main.c Src/cpu.c Src/proms.c Src/fltk_cde.c Src/img_cde.c \
+
+# normal IO set 
+norm_io     =  Src/io_proc.c Src/io_MD120.c Src/io_ST419.c Src/io_floppy.c \
+
+# interface to normal IDE disk	      
+ide_io      =  Src/io_proc.c Src/ide_disk.c Src/io_ST419.c Src/io_floppy.c Src/io_pp_ata.c \
+
+# defining fl_ask_H here avoids the FLTK compilation issue I do not understand.
+# we do not use fl_ask anyhow
+defines     = -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT -Dfl_ask_H	          
+#
+includes    = -Iinclude    -Isupport      -Ifltk/include
+#
+fltklib     = -lfltk_forms -lfltk_images  -lfltk
+#
+libdirs     = -L/usr/lib   -Lfltk/lib     -Lfltk 
+#
+# -------------------------------------------------------------------------
+#
+#window libs 
+wlibs       = -lole32 -luuid -lcomctl32  -lwsock32   -static-libgcc -static-libstdc++
+
+#linux libs
+xlibs64     = -L/usr/X11R6/lib64 -lX11  -lpthread  -lXft  -lXext 
+xlibs       = -L/usr/X11R6/lib   -lX11  -lpthread
+
+# OS-X libs
+osxlibs     = -L/usr/X11R6/lib   -lX11  -lpthread 
+# further OS- stuff
+osxstuff    = -framework Cocoa
+#
+# -------------------------------------------------------------------------
+#
+	 
+win   : 
+	g++ -Wall  -O3 -o emulith $(libdirs) $(includes) $(corefiles) $(norm_io) $(fltklib) $(defines) $(wlibs) -DWIN32 -D__CYGWIN__ -mwindows 
+
+osx   : 
+	clang++ -Wall  -O3 -o emulith $(libdirs) $(includes) $(corefiles) $(norm_io) $(fltklib) $(defines) $(osxlibs) $(osxstuff)
+
+lin   : 
+	g++ -Wall  -Os -o emulith $(libdirs) $(includes) $(corefiles) $(norm_io) $(fltklib) $(defines) $(xlibs)
+
+# target "ide" compiles emulith with an IDE disk instead of the HB120. 
+# Changed firmware will result in no obvious change to MEDOS
+# unchanged HB120 disk images are used
+ 
+ide   : 
+	g++ -Wall  -Os -o emulith $(libdirs) $(includes) $(corefiles)  $(ide_io) $(fltklib) $(defines) $(xlibs) -D_IDE_
+        
+ide_nt   : 
+	g++ -Wall  -Os -o emulith $(libdirs) $(includes) $(corefiles)  $(ide_io) $(fltklib) $(defines) $(xlibs) -D_IDE_NT_
+        
+lin64   : 
+	g++ -Wall  -Os  -fno-exceptions -fno-strict-aliasing -o emulith $(libdirs) $(includes) $(files) $(fltklib) $(defines) $(xlibs64) 
+
+fs    : 
+	gcc -Wall -pedantic  -o lft support/lft_main.c $(libdirs) $(includes)
+
+clean:
+	rm -f Src/*.o Src/*~ include/*~  
+        
+tar:	
+	tar cvf lilith.tar emulith  lilith.png Src/* support/* include/* docu/* Makefile proms/* *.def *.ini
+
+distr:	
+	rm -f vid/*
+	tar cvf lilith.tar emulith lilith.png Src/* include/* floppy/* support/* Makefile mcode/* docu/*.pdf docu/*.txt emuli* img/*.img  *.def vid
+	gzip lilith.tar
+	mv  lilith.tar.gz lilith.tgz
+        
+ed:
+	nedit include/lilith.h  Src/main.c  Src/io_proc.c Src/fltk_cde.c  &
+
+tst:   
+	echo Compiling file_chooser.cxx...
+	g++ -I..     -Os -Wall -Wunused -Wno-format-y2k  -fno-exceptions -fno-strict-aliasing -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT -I/usr/include/freetype2  -I/usr/include/freetype2 -Ifltk -Iinclude  -I/usr/X11R6/include -c fltk/test/file_chooser.cxx 
+	echo Linking file_chooser...
+	g++  -Os -Wall -Wunused -Wno-format-y2k  -fno-exceptions -fno-strict-aliasing  -L/usr/X11R6/lib64  Src/*.o -o emulith ../lib/libfltk_images.a ../lib/libfltk.a -L../lib -lpng -lz -ljpeg  -lXext -lXft -lpthread -ldl -lm  -lX11 
