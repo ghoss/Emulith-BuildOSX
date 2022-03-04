@@ -28,19 +28,19 @@ The following components will be downloaded and compiled during the build proces
 2. Create the build directories:
 
     ```
-    $ cd convenient_location
-    $ mkdir build build/fltk
+    cd convenient_location
+    mkdir build build/fltk
     ```   
 3. Download and expand the **Emulith** source files into the build directory:
 
     ```
-    $ curl ftp://ftp.dreesen.ch/Emulith/Emulith_v13.tgz | tar xzf - -C build
+    curl ftp://ftp.dreesen.ch/Emulith/Emulith_v13.tgz | tar xzf - -C build
     ```   
 4. Download the modified Makefile (`Makefile_modified`) from this repository:
 
     ```
-    $ curl -O -L https://github.com/good-sushi/Emulith-BuildOSX/raw/main/Makefile_modified
-    $ mv Makefile Makefile_original; cp Makefile_modified Makefile
+    curl -O -L https://github.com/good-sushi/Emulith-BuildOSX/raw/main/Makefile_modified
+    mv Makefile Makefile_original; cp Makefile_modified Makefile
     ```
 
 5. Download and expand the **FLTK** source files into the build subdirectory:
@@ -52,22 +52,22 @@ The following components will be downloaded and compiled during the build proces
 6. Build **FLTK** (installs into `build/fltk`, where it is expected by Emulith's Makefile):
 
     ```
-    $ cd build/fltk-1.3.8
-    $ ./configure --prefix=`pwd`/../fltk
-    $ make clean; make install
+    cd build/fltk-1.3.8
+    ./configure --prefix=`pwd`/../fltk
+    make clean; make install
     ```
     
 7. Build **Emulith**
 
     ```
-    $ cd ..
-    $ make clean; make osx
+    cd ..
+    make clean; make osx
     ```
     
 8. Start the emulator and enjoy!
 
     ```
-    $ ./emulith
+    ./emulith
     ```
 ## Appendix: My Changes To Jos' Original Makefile
 ```
