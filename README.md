@@ -39,7 +39,9 @@ The following components will be downloaded and compiled during the build proces
 4. Download the modified Makefile (`Makefile_modified`) from this repository:
 
     ```
-    $ xx
+    $ curl -O https://github.com/good-sushi/Emulith-BuildOSX/blob/main/
+Makefile_modified
+    $ mv Makefile Makefile_original; cp Makefile_modified Makefile
     ```
 
 5. Download and expand the **FLTK** source files into the build subdirectory:
